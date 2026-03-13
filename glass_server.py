@@ -35,6 +35,7 @@ if getattr(sys, "frozen", False):
         bundle_root = bundle_candidate
 has_bundle_resources = bundle_root is not None
 cwd = bundle_root if has_bundle_resources else default_root
+app_root = os.path.dirname(os.path.realpath(sys.executable if getattr(sys, "frozen", False) else __file__))
 files = os.listdir(cwd)
 for file in files:
     if(file.endswith("kml")):
@@ -213,16 +214,29 @@ def flask_thread_func(threadname):
     def load_fltpln():
         # Load Settings - MSFS Install Location
         try:
-            with open('settings.txt', 'r') as settings:
+            settings_file = os.path.join(app_root, 'settings.txt')
+            with open(settings_file, 'r') as settings:
                 lines = settings.readlines()
 
             # Get Flight Plan
             fltpln_dir = ""
             for line in lines:
-                if len(line) > 0:
-                    if line[0] != "#":
-                        fltpln_dir = os.path.normpath(line.strip().replace("\\", os.sep))
+                line = line.strip()
+                if len(line) > 0 and line[0] != "#":
+                    if "=" in line:
+                        key, _, value = line.partition("=")
+                        key = key.strip().upper()
+                        if key == "MSFS_INSTALL_PATH":
+                            fltpln_dir = value.strip()
+                            break
+                    else:
+                        fltpln_dir = line
                         break
+            env_fltpln_dir = os.getenv("MSFS_INSTALL_PATH", "").strip()
+            fltpln_dir = env_fltpln_dir if env_fltpln_dir else fltpln_dir.strip()
+            if fltpln_dir == "":
+                raise FileNotFoundError("MSFS install path is not configured in settings.txt or MSFS_INSTALL_PATH")
+            fltpln_dir = os.path.normpath(fltpln_dir.replace("\\", os.sep))
 
             try:
                 # MS Store
