@@ -26,11 +26,15 @@ selected_plane = ""
 # list of kml files in program directroy
 kml_list = []
 
+default_root = os.path.realpath(os.path.join(
+    os.getcwd(), os.path.dirname(__file__)))
+bundle_root = None
 if getattr(sys, "frozen", False):
-    cwd = sys._MEIPASS
-else:
-    cwd = os.path.realpath(os.path.join(
-        os.getcwd(), os.path.dirname(__file__)))
+    bundle_candidate = getattr(sys, "_MEIPASS", None)
+    if isinstance(bundle_candidate, str) and bundle_candidate and os.path.isdir(bundle_candidate):
+        bundle_root = bundle_candidate
+has_bundle_resources = bundle_root is not None
+cwd = bundle_root if has_bundle_resources else default_root
 files = os.listdir(cwd)
 for file in files:
     if(file.endswith("kml")):
@@ -88,9 +92,9 @@ def flask_thread_func(threadname):
     selected_plane = planes_list[0]
     ui_friendly_dictionary["selected_plane"] = selected_plane
 
-    if getattr(sys, "frozen", False):
-        template_folder = os.path.join(sys._MEIPASS, "templates")
-        static_folder = os.path.join(sys._MEIPASS, "static")
+    if has_bundle_resources:
+        template_folder = os.path.join(bundle_root, "templates")
+        static_folder = os.path.join(bundle_root, "static")
         app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
     else:
         app = Flask(__name__)
@@ -217,7 +221,7 @@ def flask_thread_func(threadname):
             for line in lines:
                 if len(line) > 0:
                     if line[0] != "#":
-                        fltpln_dir = line.strip().rstrip("\\/")
+                        fltpln_dir = os.path.normpath(line.strip().replace("\\", os.sep))
                         break
 
             try:
