@@ -12,6 +12,7 @@ import asyncio
 from threading import Thread
 import datetime
 import os
+import sys
 
 print(socket.gethostbyname(socket.gethostname()))
 
@@ -25,8 +26,11 @@ selected_plane = ""
 # list of kml files in program directroy
 kml_list = []
 
-cwd = os.path.realpath(os.path.join(
-    os.getcwd(), os.path.dirname(__file__)))
+if getattr(sys, "frozen", False):
+    cwd = sys._MEIPASS
+else:
+    cwd = os.path.realpath(os.path.join(
+        os.getcwd(), os.path.dirname(__file__)))
 files = os.listdir(cwd)
 for file in files:
     if(file.endswith("kml")):
@@ -84,7 +88,12 @@ def flask_thread_func(threadname):
     selected_plane = planes_list[0]
     ui_friendly_dictionary["selected_plane"] = selected_plane
 
-    app = Flask(__name__)
+    if getattr(sys, "frozen", False):
+        template_folder = os.path.join(sys._MEIPASS, "templates")
+        static_folder = os.path.join(sys._MEIPASS, "static")
+        app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
+    else:
+        app = Flask(__name__)
     log = logging.getLogger('werkzeug')
     log.disabled = True
 
@@ -208,21 +217,19 @@ def flask_thread_func(threadname):
             for line in lines:
                 if len(line) > 0:
                     if line[0] != "#":
-                        fltpln_dir = line
-                        # Check to delete \ at the endswith
-                        if fltpln_dir[-1] == "\\":
-                            fltpln_dir = fltpln_dir[:-1]
+                        fltpln_dir = line.strip().rstrip("\\/")
                         break
 
             try:
                 # MS Store
-                fltpln_dir_full = fltpln_dir + \
-                    "\LocalState\MISSIONS\Custom\CustomFlight\CUSTOMFLIGHT.FLT"
+                fltpln_dir_full = os.path.join(
+                    fltpln_dir, "LocalState", "MISSIONS", "Custom", "CustomFlight", "CUSTOMFLIGHT.FLT")
                 with open(fltpln_dir_full, 'r') as fltpln:
                     fltpln_lines = fltpln.readlines()
             except:
                 # Steam
-                fltpln_dir_full = fltpln_dir + "\MISSIONS\Custom\CustomFlight\CUSTOMFLIGHT.FLT"
+                fltpln_dir_full = os.path.join(
+                    fltpln_dir, "MISSIONS", "Custom", "CustomFlight", "CUSTOMFLIGHT.FLT")
                 with open(fltpln_dir_full, 'r') as fltpln:
                     fltpln_lines = fltpln.readlines()
 

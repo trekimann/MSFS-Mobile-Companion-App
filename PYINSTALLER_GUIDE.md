@@ -1,34 +1,27 @@
-# MSFS MOBILE COMPANION APP Pyinstaller Instructions
+# MSFS MOBILE COMPANION APP PyInstaller Instructions
 
-To compile an executable version of MSFS Mobile Companion App using pyinstaller follow these 4 steps:
+To compile an executable version of MSFS Mobile Companion App using PyInstaller:
 
-## 1. Change glass_server.py:
+## 1. Install dependencies
 
-Change line 54 from:
-
-`app = Flask(__name__)`
-
-into:
-
-```
-if getattr(sys, 'frozen', False):
-    template_folder = os.path.join(sys._MEIPASS, 'templates')
-    static_folder = os.path.join(sys._MEIPASS, 'static')
-    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
-else:
-    app = Flask(__name__)
+```bash
+pip install -r requirements.txt pyinstaller
 ```
 
-## 2. Rename SimConnect.dll
+## 2. Build for Windows
 
-Rename the *SimConnect.dll* file into *SimConnect.dllc*.
-
-## 3. Compile MSFS Mobile Companion App using pyinstaller
-
-Use the following pyinstaller settings to compile MSFS Mobile Companion App:
-
-```
+```bash
 pyinstaller -F --onefile --add-data "templates;templates" --add-data "static;static" --add-data "SimConnect;SimConnect" glass_server.py
 ```
 
-## 4. Enjoy and have fun!
+## 3. Build for Linux (including Bazzite)
+
+```bash
+pyinstaller -F --onefile --add-data "templates:templates" --add-data "static:static" --add-data "SimConnect:SimConnect" glass_server.py
+```
+
+### Notes for Bazzite users
+
+- Bazzite can run the app natively as a Linux binary.
+- This project still depends on Microsoft Flight Simulator SimConnect components, so simulator connectivity depends on the target MSFS environment and SimConnect compatibility.
+- The generated binary is under `dist/glass_server`.

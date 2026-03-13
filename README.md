@@ -44,6 +44,10 @@ MSFS Mobile Companion App has built-in support for the following aircraft:
 1. Download the latest build [here](https://github.com/mracko/MSFS-Mobile-Companion-App/releases/).
 2. That's it.
 
+## Native Linux/Bazzite build
+
+For native PyInstaller build steps on Linux distributions (including Bazzite), see [PYINSTALLER_GUIDE.md](PYINSTALLER_GUIDE.md).
+
 ## How do I run MSFS Mobile Companion App?
 **Don't install the app on your mobile device. Download and run it on your PC. This creates a local web server to which you connect from your mobile device via an IP address.**
 1. Copy the **mobiflight-event-module** folder into the Community folder of Microsoft Flight Simulator. The MobiFlight WASM Module allows the app to access additional cockpit switches. You will find the Community folder under:
