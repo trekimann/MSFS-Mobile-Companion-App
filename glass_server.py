@@ -12,6 +12,7 @@ import asyncio
 from threading import Thread
 import datetime
 import os
+import sys
 
 print(socket.gethostbyname(socket.gethostname()))
 
@@ -25,8 +26,16 @@ selected_plane = ""
 # list of kml files in program directroy
 kml_list = []
 
-cwd = os.path.realpath(os.path.join(
+default_root = os.path.realpath(os.path.join(
     os.getcwd(), os.path.dirname(__file__)))
+bundle_root = None
+if getattr(sys, "frozen", False):
+    bundle_candidate = getattr(sys, "_MEIPASS", None)
+    if isinstance(bundle_candidate, str) and bundle_candidate and os.path.isdir(bundle_candidate):
+        bundle_root = bundle_candidate
+has_bundle_resources = bundle_root is not None
+cwd = bundle_root if has_bundle_resources else default_root
+app_root = os.path.dirname(os.path.realpath(sys.executable if getattr(sys, "frozen", False) else __file__))
 files = os.listdir(cwd)
 for file in files:
     if(file.endswith("kml")):
@@ -84,7 +93,12 @@ def flask_thread_func(threadname):
     selected_plane = planes_list[0]
     ui_friendly_dictionary["selected_plane"] = selected_plane
 
-    app = Flask(__name__)
+    if has_bundle_resources:
+        template_folder = os.path.join(bundle_root, "templates")
+        static_folder = os.path.join(bundle_root, "static")
+        app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
+    else:
+        app = Flask(__name__)
     log = logging.getLogger('werkzeug')
     log.disabled = True
 
@@ -200,29 +214,40 @@ def flask_thread_func(threadname):
     def load_fltpln():
         # Load Settings - MSFS Install Location
         try:
-            with open('settings.txt', 'r') as settings:
+            settings_file = os.path.join(app_root, 'settings.txt')
+            with open(settings_file, 'r') as settings:
                 lines = settings.readlines()
 
             # Get Flight Plan
             fltpln_dir = ""
             for line in lines:
-                if len(line) > 0:
-                    if line[0] != "#":
+                line = line.strip()
+                if len(line) > 0 and line[0] != "#":
+                    if "=" in line:
+                        key, _, value = line.partition("=")
+                        key = key.strip().upper()
+                        if key == "MSFS_INSTALL_PATH":
+                            fltpln_dir = value.strip()
+                            break
+                    else:
                         fltpln_dir = line
-                        # Check to delete \ at the endswith
-                        if fltpln_dir[-1] == "\\":
-                            fltpln_dir = fltpln_dir[:-1]
                         break
+            env_fltpln_dir = os.getenv("MSFS_INSTALL_PATH", "").strip()
+            fltpln_dir = env_fltpln_dir if env_fltpln_dir else fltpln_dir.strip()
+            if fltpln_dir == "":
+                raise FileNotFoundError("MSFS install path is not configured in settings.txt or MSFS_INSTALL_PATH")
+            fltpln_dir = os.path.normpath(fltpln_dir.replace("\\", os.sep))
 
             try:
                 # MS Store
-                fltpln_dir_full = fltpln_dir + \
-                    "\LocalState\MISSIONS\Custom\CustomFlight\CUSTOMFLIGHT.FLT"
+                fltpln_dir_full = os.path.join(
+                    fltpln_dir, "LocalState", "MISSIONS", "Custom", "CustomFlight", "CUSTOMFLIGHT.FLT")
                 with open(fltpln_dir_full, 'r') as fltpln:
                     fltpln_lines = fltpln.readlines()
             except:
                 # Steam
-                fltpln_dir_full = fltpln_dir + "\MISSIONS\Custom\CustomFlight\CUSTOMFLIGHT.FLT"
+                fltpln_dir_full = os.path.join(
+                    fltpln_dir, "MISSIONS", "Custom", "CustomFlight", "CUSTOMFLIGHT.FLT")
                 with open(fltpln_dir_full, 'r') as fltpln:
                     fltpln_lines = fltpln.readlines()
 

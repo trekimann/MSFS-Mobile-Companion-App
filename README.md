@@ -44,14 +44,19 @@ MSFS Mobile Companion App has built-in support for the following aircraft:
 1. Download the latest build [here](https://github.com/mracko/MSFS-Mobile-Companion-App/releases/).
 2. That's it.
 
+## Native Linux/Bazzite build
+
+For native PyInstaller build steps on Linux distributions (including Bazzite), see [PYINSTALLER_GUIDE.md](PYINSTALLER_GUIDE.md).
+
 ## How do I run MSFS Mobile Companion App?
 **Don't install the app on your mobile device. Download and run it on your PC. This creates a local web server to which you connect from your mobile device via an IP address.**
 1. Copy the **mobiflight-event-module** folder into the Community folder of Microsoft Flight Simulator. The MobiFlight WASM Module allows the app to access additional cockpit switches. You will find the Community folder under:
    - MS Store users: C:\Users\YOURUSERNAME\AppData\Local\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\LocalCache\Packages
    - Steam users: C:\Users\YOURUSERNAME\AppData\Roaming\Microsoft Flight Simulator\Packages\
-2. Open the **settings.txt** file, that you’ve unzipped together with the MSFS_MCA_v1-9.exe and this guide, and change the last line to reflect your Microsoft Flight Simulator installation folder. This step is only necessary if you wish to use the Load Flight Plan functionality. Hint:
-   - MS Store users: C:\Users\YOURUSERNAME\AppData\Local\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\
-   - Steam users: C:\Users\YOURUSERNAME\AppData\Roaming\Microsoft Flight Simulator\
+2. Open the **settings.txt** file, that you’ve unzipped together with the MSFS_MCA_v1-9.exe and this guide, and update the MSFS installation folder (`MSFS_INSTALL_PATH=...`). This step is only necessary if you wish to use the Load Flight Plan functionality. You can also set `MSFS_INSTALL_PATH` as an environment variable during installation. Hint:
+    - MS Store users: C:\Users\YOURUSERNAME\AppData\Local\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\
+    - Steam users: C:\Users\YOURUSERNAME\AppData\Roaming\Microsoft Flight Simulator\
+    - Linux/Bazzite (Steam/Proton): /home/YOURUSERNAME/.steam/steam/steamapps/compatdata/1250410/pfx/drive_c/users/steamuser/AppData/Roaming/Microsoft Flight Simulator/
 3. Make sure your PC and your mobile device are connected to the same local network and that your home network is set to *Private* in your Network Profile settings. You can find a short guide on how to set your network to private [here](https://support.microsoft.com/en-us/windows/make-a-wi-fi-network-public-or-private-in-windows-10-0460117d-8d3e-a7ac-f003-7a0da607448d). 
 4. Start a flight in Microsoft Flight Simulator.
 5. Run MSFS_MCA_v1-9.exe that you've unzipped previously. You can place this file where you wish. Just make sure that the MSFS_MCA_v1-9.exe and the settings.txt file are in the same folder.
